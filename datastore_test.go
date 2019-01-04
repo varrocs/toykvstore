@@ -11,8 +11,8 @@ func TestPutGet(t *testing.T) {
 
 	ds.Put("hello", "bello")
 
-	result := ds.Get("hello")
-	if result != "bello" {
+	result, err := ds.Get("hello")
+	if result != "bello" || err != nil {
 		t.Errorf("result: '%v', expected: '%v'", result, "bello")
 	}
 }
@@ -20,21 +20,20 @@ func TestPutGet(t *testing.T) {
 func TestEmpty(t *testing.T) {
 	ds := createDataStore()
 
-	result := ds.Get("hello")
-	if result != "" {
+	result, err := ds.Get("hello")
+	if result != "" || err != nil {
 		t.Errorf("result: '%v', expected: '%v'", result, "")
 	}
 }
 
 func TestAddGetModify(t *testing.T) {
-
 	ds := createDataStore()
 
 	ds.Put("hello", "bello")
 	ds.Put("hello", "csa")
 
-	result := ds.Get("hello")
-	if result != "csa" {
+	result, err := ds.Get("hello")
+	if result != "csa" || err != nil {
 		t.Errorf("result: '%v', expected: '%v'", result, "csa")
 	}
 }

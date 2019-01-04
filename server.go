@@ -25,7 +25,10 @@ func createGetHandler(dataStore DataStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		key := mux.Vars(r)["key"]
 		fmt.Printf("[ ] get called for id: '%v'\n", key)
-		value := dataStore.Get(key)
+		value, err := dataStore.Get(key)
+		if err != nil {
+			panic(err)
+		}
 		fmt.Fprintf(w, `{"%s": "%s"}`, key, value)
 	}
 }
@@ -43,7 +46,11 @@ func createPutHandler(dataStore DataStore) http.HandlerFunc {
 		}
 		for key, value := range data {
 			fmt.Printf("[ ] put called for id: %v, value %v\n", key, value)
-			dataStore.Put(key, value)
+			err = dataStore.Put(key, value)
+			if err != nil {
+				panic(err)
+			}
+
 			fmt.Fprintf(w, `{"%s": "%s"}`, key, value)
 			break
 		}

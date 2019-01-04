@@ -2,11 +2,17 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gorilla/mux"
+)
+
+const (
+	REDIS_ADDRESS = "localhost:6379"
 )
 
 type TestContext struct {
@@ -14,10 +20,20 @@ type TestContext struct {
 	router    *mux.Router
 }
 
-func newTestContext() *TestContext {
+var isRedisTest bool
+
+func newTestContext() (*TestContext, error) {
 	serverId := "test"
-	dataStore := NewInMemoryDataStore()
-	return &TestContext{dataStore: NewInMemoryDataStore(), router: createRouter(serverId, dataStore)}
+	var dataStore DataStore
+	var err error
+
+	if isRedisTest {
+		dataStore, err = NewRedisDataStore(REDIS_ADDRESS)
+	} else {
+		dataStore = NewInMemoryDataStore()
+	}
+
+	return &TestContext{dataStore: NewInMemoryDataStore(), router: createRouter(serverId, dataStore)}, err
 }
 
 func testRequest(c *TestContext, req *http.Request, expectedBody string, t *testing.T) {
@@ -38,7 +54,10 @@ func testRequest(c *TestContext, req *http.Request, expectedBody string, t *test
 }
 
 func TestHello(t *testing.T) {
-	c := newTestContext()
+	c, err := newTestContext()
+	if err != nil {
+		t.Fatal(err)
+	}
 	req, err := http.NewRequest("GET", "/hello", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -48,7 +67,11 @@ func TestHello(t *testing.T) {
 }
 
 func TestRoot(t *testing.T) {
-	c := newTestContext()
+	c, err := newTestContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -58,7 +81,11 @@ func TestRoot(t *testing.T) {
 }
 
 func TestEcho(t *testing.T) {
-	c := newTestContext()
+	c, err := newTestContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	req, err := http.NewRequest("POST", "/echo", bytes.NewBuffer([]byte(`data`)))
 	if err != nil {
 		t.Fatal(err)
@@ -68,7 +95,11 @@ func TestEcho(t *testing.T) {
 }
 
 func TestPutGetRequest(t *testing.T) {
-	c := newTestContext()
+	c, err := newTestContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	putRequest1, err := http.NewRequest("POST", "/key", bytes.NewBuffer([]byte(`{"hello": "bello"}`)))
 	if err != nil {
 		t.Fatal(err)
@@ -86,4 +117,24 @@ func TestPutGetRequest(t *testing.T) {
 	testRequest(c, getRequest, `{"hello": "bello"}`, t)
 	testRequest(c, putRequest2, `{"hello": "csa"}`, t)
 	testRequest(c, getRequest, `{"hello": "csa"}`, t)
+}
+
+func TestMain(m *testing.M) {
+	var returnCode int
+
+	fmt.Println("RUNNING IN MEMORY TESTS")
+	isRedisTest = false
+	returnCode = m.Run()
+
+	if returnCode != 0 {
+		os.Exit(returnCode)
+	}
+
+	fmt.Println("RUNNING REDIS TESTS")
+	isRedisTest = true
+	returnCode = m.Run()
+
+	if returnCode != 0 {
+		os.Exit(returnCode)
+	}
 }
