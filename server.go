@@ -92,10 +92,18 @@ func createRouter(serverId string, dataStore DataStore) *mux.Router {
 
 func main() {
 	serverId := "12"
-	dataStore := NewInMemoryDataStore()
+	redisAddress := GetRedisAddress()
+	dataStore, err := NewRedisDataStore(GetRedisAddress())
+	if err == nil {
+		fmt.Println("Starting with redis store: ", redisAddress)
+	} else {
+		fmt.Println("Failed to start with redis on :", redisAddress, ", error:", err, "Starting in memory DB")
+		dataStore = NewInMemoryDataStore()
+	}
 
 	r := createRouter(serverId, dataStore)
 
-	fmt.Printf("Starting %v\n", serverId)
-	log.Fatal(http.ListenAndServe(":8080", r))
+	listenAddress := ":8080"
+	fmt.Printf("Starting %v on address %v\n", serverId, listenAddress)
+	log.Fatal(http.ListenAndServe(listenAddress, r))
 }

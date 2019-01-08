@@ -1,6 +1,14 @@
 package main
 
-import "github.com/go-redis/redis"
+import (
+	"os"
+
+	"github.com/go-redis/redis"
+)
+
+const (
+	DEFAULT_REDIS_ADDRESS = "localhost:6379"
+)
 
 type RedisDataStore struct {
 	client *redis.Client
@@ -14,6 +22,15 @@ func (self *RedisDataStore) Put(id, value string) error {
 func (self *RedisDataStore) Get(id string) (string, error) {
 	value, err := self.client.Get(id).Result()
 	return value, err
+}
+
+func GetRedisAddress() string {
+	addr := os.Getenv("REDIS_URL")
+	if addr == "" {
+		return addr
+	} else {
+		return DEFAULT_REDIS_ADDRESS
+	}
 }
 
 func NewRedisDataStore(address string) (DataStore, error) {

@@ -11,10 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	REDIS_ADDRESS = "localhost:6379"
-)
-
 type TestContext struct {
 	dataStore DataStore
 	router    *mux.Router
@@ -28,7 +24,7 @@ func newTestContext() (*TestContext, error) {
 	var err error
 
 	if isRedisTest {
-		dataStore, err = NewRedisDataStore(REDIS_ADDRESS)
+		dataStore, err = NewRedisDataStore(GetRedisAddress())
 	} else {
 		dataStore = NewInMemoryDataStore()
 	}
