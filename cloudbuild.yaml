@@ -1,5 +1,6 @@
 steps:
 - name: 'gcr.io/cloud-builders/go'
+  env: ['GO111MODULE=on']
   args: [ 'build' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/toykvstore', '.' ]
