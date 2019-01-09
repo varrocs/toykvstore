@@ -10,6 +10,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+    DEFAULT_SERVER_ID="?"
+)
+
 type EchoResponse struct {
 	Body string `json:"body"`
 }
@@ -91,7 +95,7 @@ func createRouter(serverId string, dataStore DataStore) *mux.Router {
 }
 
 func main() {
-	serverId := "12"
+	serverId := DEFAULT_SERVER_ID
 	redisAddress := GetRedisAddress()
 	dataStore, err := NewRedisDataStore(GetRedisAddress())
 	if err == nil {
