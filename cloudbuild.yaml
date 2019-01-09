@@ -13,9 +13,9 @@ steps:
   - 'image'
   - 'deployment/toykvstore'
   - 'toykvstore=gcr.io/$PROJECT_ID/toykvstore:$REVISION_ID'
-    #env:
-    #- 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
-    #- 'CLOUDSDK_CONTAINER_CLUSTER=your-first-cluster-1'
+    env:
+    - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=your-first-cluster-1'
 images:
 - 'gcr.io/$PROJECT_ID/toykvstore'
 
